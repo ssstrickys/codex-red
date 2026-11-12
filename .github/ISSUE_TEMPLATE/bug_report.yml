@@ -1,0 +1,29 @@
+name: Knowledge or package defect
+description: Report incorrect technical guidance or a packaging problem.
+title: "[Bug]: "
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: "Use synthetic or redacted examples. See SECURITY.md for sensitive reports."
+  - type: textarea
+    id: environment
+    attributes:
+      label: Version and affected reference
+      description: Identify the Codex Red revision and relevant platform/version.
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: Describe the incorrect claim or package behavior.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior or interpretation
+      description: Include a primary source or a small synthetic example where useful.
+    validations:
+      required: true

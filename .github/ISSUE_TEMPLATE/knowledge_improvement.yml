@@ -1,0 +1,25 @@
+name: Knowledge improvement
+description: Propose a concrete correction or useful mechanism for an existing reference.
+title: "[Knowledge]: "
+labels: [enhancement]
+body:
+  - type: input
+    id: reference
+    attributes:
+      label: Domain or reference
+    validations:
+      required: true
+  - type: textarea
+    id: correction
+    attributes:
+      label: Proposed correction or addition
+      description: Explain the mechanism, preconditions and relevant version/configuration limits.
+    validations:
+      required: true
+  - type: textarea
+    id: source
+    attributes:
+      label: Supporting source
+      description: Link a primary specification or provide a synthetic example. Keep private project details out of the issue.
+    validations:
+      required: true

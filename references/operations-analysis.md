@@ -1,0 +1,45 @@
+# Host internals, execution and telemetry
+
+Windows identity, object access, executable loading, persistence mechanisms, remote-operation protocols and telemetry expose different host trust boundaries. Their behavior depends on the actual OS/build, process context and enforcement policy.
+
+## Execution boundaries
+
+An execution transition depends on process/thread identity, privilege boundary, executable mapping, loader/API path, memory protection, integrity/signing policy and control-flow mitigation. Configuration, static capability, runtime enforcement and an observed transition are different properties. Mitigation behavior varies with OS/build and binary configuration.
+
+Input capture, injected code and persistence mechanisms have distinct data flows, execution conditions, side effects and detection surfaces. Understanding an artifact does not authorize credential collection, persistence or other external state changes.
+
+## Identity, handles and executable state
+
+On Windows, a process's primary token and a thread's impersonation token can provide different effective identities. Authentication identity, enabled group attributes, privileges, integrity level, elevation state, restricted SIDs and AppContainer capabilities answer different questions. An administrator-group membership can be filtered or deny-only; an integrity level primarily participates in mandatory access policy and does not replace an object's DACL. AppContainer adds a restricted capability model rather than merely another integrity label. A privileged account name does not establish the effective token used for a particular access.
+
+An object handle carries the access granted when it was opened or duplicated. A token change, process name or PID does not reveal what an existing handle permits. Object type, granted rights, handle provenance and lifetime determine the applicable boundary. Protected-process/PPL restrictions, object ACLs, privileges and mitigation policy can independently constrain access; being an administrator does not erase every restriction. Protected-process behavior depends on the actual protection and signer levels, OS build and requested operation. Native system calls still encounter kernel authorization and policy enforcement; avoiding a user-mode wrapper is not a privilege transition.
+
+PIDs are reused; creation time or an equivalent stable process identity distinguishes process instances. A recorded parent relationship is not always the same as the thread/process that requested creation, and neither alone proves the human operator. Input APIs and window instrumentation depend on desktop/session, hook type, bitness, target integrity and message-loop lifetime. A low-level hook callback in its owner's context, a hook DLL loaded into another process, and raw-input delivery are different mechanisms. A capture working in an instrumented interactive session does not establish access across sessions or the secure desktop. Undocumented internal call paths need not remain stable across builds.
+
+A byte buffer, a mapped image and a correctly callable function are separate states. For loader or code-loading research, the relevant dependencies may include architecture, instruction/data addressing, relocations, imports, TLS initialization, alignment, stack/ABI rules, exception/unwind metadata and synchronization. Position independence of instruction fetch does not make external data references or imported functions self-contained. Copying a PE's file bytes into memory is not equivalent to the platform loader's image mapping. A failure of one loading obligation does not establish a failure of unrelated protections.
+
+Memory permissions, image signing and control-flow checks protect different transitions. DEP/NX concerns executing a non-executable mapping. ASLR concerns address predictability and depends on actual image/mapping behavior and entropy. Stack cookies protect selected overwritten state when their check executes; they are not general memory safety. CFG checks applicable instrumented forward-edge transfers against allowed targets; it does not validate ordinary return addresses or authorize a valid function's use. Compatibility policy can allow targets in non-instrumented modules, so do not assume every non-CFG image is automatically an invalid target. XFG adds supported type-based constraints. CET shadow stacks concern return integrity; CET also has an indirect-branch-tracking facility, with enforcement dependent on architecture, OS and binary support.
+
+Dynamic-code restrictions such as ACG and image-load signing restrictions such as CIG are distinct from each other and from application control. Effective per-process policy, relevant exceptions and image-load or protection-change results determine enforcement; an executable's capability flag alone does not prove enforcement. VBS/HVCI, Credential Guard, LSA protection and application control have different objects and trust boundaries. Isolated credential material does not imply that all credentials, application secrets, existing sessions or every authorized use are inaccessible. One named mitigation does not establish prevention of an entire technique family.
+
+## Persistence and remote-operation mechanisms
+
+Persistent execution depends on registration/configuration, a trigger, action resolution, runtime identity and execution conditions. A scheduled task may be registered yet never trigger, lack its referenced action, or run under a different account. A permanent WMI subscription links a filter, consumer and binding; existence of one component does not establish a functioning chain. Service definitions, Run entries, COM registration, systemd units/timers, cron entries, SSH authorization and shell-startup files each have their own discovery, loading and policy conditions. The actual binary/module path, arguments, environment, permissions and effective principal determine the action. A writable candidate directory is not proof that the loader selected a file from it. Registry or repository artifacts still exist for many so-called fileless mechanisms.
+
+Network reachability, successful authentication, service authorization and the resulting effect are separate properties of remote operations. An NTLM response, password hash, Kerberos ticket, certificate and an established session are different credential forms with different bindings and expiry. A ticket for one service is not universal command authority. Signing, channel binding, extended protection, target identity, account restrictions and local token policy can constrain a particular authentication/relay path; a claim about SMB signing does not settle every other protocol. Remote service creation, WMI, WinRM, RPC/DCOM, RDP and SSH have different endpoint, rights and execution-context requirements. A tunnel changes reachability, not the remote account's permissions.
+
+A source read, local staging, encoding or transport event does not establish destination acceptance or reconstruction. Base64 is an encoding, not encryption; encrypted transport does not authenticate every application recipient. Compression/chunking, retries and deduplication can change byte or request counts. A local archive, a DNS query, an outbound socket or a signed URL proves only its own stage unless the receiving effect is observed. Signed storage URLs generally confer the specific bearer capability encoded by their scope and lifetime; they do not prove an entire bucket is public. Protocol or artifact understanding does not itself authorize operational delivery or transfer.
+
+## Telemetry interpretation
+
+Authorized access to one host does not grant authority over every reachable host or operation.
+
+Sensor coverage, collection delay, alert generation and analyst triage are different conditions. Absence of an alert does not establish invisibility, and missing observations leave the relevant behavior unresolved.
+
+Content scanning such as AMSI, event production such as ETW, user-mode instrumentation, kernel callbacks/drivers and remote analytics observe different surfaces. An observation missing at one layer can remain visible at another; an API success does not prove telemetry arrived, and an alert does not prove prevention. Provider/event configuration, dropped buffers, agent health, transport delay and retention can affect whether an observation is available. Configuration or event IDs are leads to the correct source, not universal evidence contracts across OS versions and sensor deployments.
+
+## Artifact and protocol interpretation
+
+Acquisition method/time, volatile-state availability, clock offsets and analyst transformations constrain artifact and timeline interpretation. Tampering can alter the reliability of a source. C2 protocol semantics include framing, registration/state transitions, command encoding/encryption and host effects; knowledge of those semantics does not require an operational control server.
+
+Memory-corruption semantics are covered in [vulnerability-research.md](vulnerability-research.md); debugger-specific interpretation is covered in [debugger-evidence.md](debugger-evidence.md).

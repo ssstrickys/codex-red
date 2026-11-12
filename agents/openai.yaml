@@ -1,0 +1,8 @@
+interface:
+  display_name: Codex Red
+  short_description: Security and reverse engineering knowledge for Codex
+  default_prompt: Use $codex-red to apply the relevant security and reverse-engineering knowledge to this task.
+  icon_small: assets/codex-red-icon.png
+  icon_large: assets/codex-red-icon.png
+policy:
+  allow_implicit_invocation: true
